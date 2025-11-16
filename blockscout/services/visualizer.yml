@@ -1,0 +1,13 @@
+version: '3.9'
+
+services:
+  visualizer:
+    image: ghcr.io/blockscout/visualizer:${VISUALIZER_DOCKER_TAG:-latest}
+    pull_policy: if_not_present
+    restart: always
+    container_name: 'visualizer'
+    env_file:
+      -  ../envs/common-visualizer.env
+    networks:
+      ethnet:
+        ipv4_address: 172.20.0.111

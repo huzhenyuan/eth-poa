@@ -1,0 +1,11 @@
+version: '3.9'
+
+services:
+  sig-provider:
+    image: ghcr.io/blockscout/sig-provider:${SIG_PROVIDER_DOCKER_TAG:-latest}
+    pull_policy: if_not_present
+    restart: always
+    container_name: 'sig-provider'
+    networks:
+      ethnet:
+        ipv4_address: 172.20.0.106

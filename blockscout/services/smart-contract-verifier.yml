@@ -1,0 +1,13 @@
+version: '3.9'
+
+services:
+  smart-contract-verifier:
+    image: ghcr.io/blockscout/smart-contract-verifier:${SMART_CONTRACT_VERIFIER_DOCKER_TAG:-latest}
+    pull_policy: if_not_present
+    restart: always
+    container_name: 'smart-contract-verifier'
+    env_file:
+      -  ../envs/common-smart-contract-verifier.env
+    networks:
+      ethnet:
+        ipv4_address: 172.20.0.107

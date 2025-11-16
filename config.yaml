@@ -1,0 +1,45 @@
+# 以太坊PoA私有网络配置文件
+# 使用此配置文件定义网络中的区块生产者和同步节点
+
+# Docker镜像配置
+docker_image: "ethereum/client-go:v1.13.15"  # 或使用 "ethereum/client-go:latest"
+
+# 网络参数配置
+network:
+  name: "ethereum-poa-network"      # 网络名称（也作为输出目录名）
+  chain_id: 123454321           # 链ID，必须唯一
+  block_period: 5               # 区块生成间隔（秒）
+  epoch: 30000                  # 治理周期（区块数）
+  gas_limit: "800000000"        # Gas限制
+  initial_balance: "1000000000000000000"  # 初始余额（Wei，1 ETH = 10^18 Wei）
+  subnet: "172.20.0.0/16"       # Docker网络子网
+  base_ip: "172.20.0.2"         # 起始IP地址
+
+# 区块生产者（Validators/Miners）
+# 这些节点参与共识，负责产生区块
+producers:
+  - name: producer1             # 节点名称
+    password: "password"       # 账户密码
+  
+  - name: producer2
+    password: "password"
+      
+  - name: producer3
+    password: "password"
+      
+  - name: producer4
+    password: "password"
+  
+  # 可以添加更多生产者
+  # - name: producer5
+  #   password: "password"
+
+# 区块同步者（Synchers/Non-mining nodes）
+# 这些节点只同步区块，不参与出块
+synchers:
+  - name: syncher1              # 节点名称
+    password: "password_sync1"  # 账户密码
+  
+  # 可以添加更多同步者
+  # - name: syncher2
+  #   password: "password_sync2"
