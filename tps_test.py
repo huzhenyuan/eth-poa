@@ -306,17 +306,21 @@ class TPSTest:
             
             return True
             
-        except Exception as e:
-            # 静默处理错误以避免输出过多，常见错误包括 nonce 冲突、余额不足等
+        except Exception:
+            # 静默处理错误以避免输出过多
+            # 常见错误：nonce 冲突、余额不足、网络错误等
+            # 失败会在统计中反映，无需详细日志
             return False
     
     async def send_transaction_async(self, sender: Account, receiver: Account, nonce: int) -> bool:
         """
-        异步发送单笔交易（包装器）
+        异步发送单笔交易
         
-        注意：当前 web3.py 的操作是同步的，此方法为异步接口的包装
+        注意：当前 web3.py 的 HTTP provider 操作是同步的，
+        此方法通过事件循环在线程池中执行以提供异步接口
         """
-        return self._send_transaction(sender, receiver, nonce)
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(None, self._send_transaction, sender, receiver, nonce)
     
     def send_transaction_sync(self, sender: Account, receiver: Account, nonce: int) -> bool:
         """同步发送单笔交易（包装器）"""
