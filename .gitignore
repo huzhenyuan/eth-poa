@@ -1,2 +1,23 @@
 ethereum-poa-network
 blockscout/data
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Test accounts
+test_accounts.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo

@@ -1,0 +1,11 @@
+# Ethereum PoA Network Dependencies
+
+# Core dependencies for network generation
+pyyaml>=6.0
+
+# Optional: For faster enode ID generation (used by generate_network.py)
+coincurve>=18.0.0
+
+# TPS test dependencies  
+web3>=6.0.0
+eth-account>=0.9.0
