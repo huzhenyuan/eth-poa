@@ -19,7 +19,6 @@ from typing import List, Dict, Tuple
 from decimal import Decimal
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
-from datetime import datetime
 
 from web3 import Web3
 try:
@@ -282,8 +281,12 @@ class TPSTest:
         
         return ready_count, empty_count
     
-    async def send_transaction_async(self, sender: Account, receiver: Account, nonce: int) -> bool:
-        """异步发送单笔交易"""
+    def _send_transaction(self, sender: Account, receiver: Account, nonce: int) -> bool:
+        """
+        发送单笔交易（不等待确认）
+        
+        注意：返回 True 表示交易成功提交到交易池，不代表交易已被确认
+        """
         try:
             transfer_amount_wei = self.w3.to_wei(self.config.transfer_amount, 'ether')
             gas_price = self.w3.to_wei(self.config.gas_price_gwei, 'gwei')
@@ -304,32 +307,20 @@ class TPSTest:
             return True
             
         except Exception as e:
-            # 静默处理错误，避免输出过多
+            # 静默处理错误以避免输出过多，常见错误包括 nonce 冲突、余额不足等
             return False
     
+    async def send_transaction_async(self, sender: Account, receiver: Account, nonce: int) -> bool:
+        """
+        异步发送单笔交易（包装器）
+        
+        注意：当前 web3.py 的操作是同步的，此方法为异步接口的包装
+        """
+        return self._send_transaction(sender, receiver, nonce)
+    
     def send_transaction_sync(self, sender: Account, receiver: Account, nonce: int) -> bool:
-        """同步发送单笔交易"""
-        try:
-            transfer_amount_wei = self.w3.to_wei(self.config.transfer_amount, 'ether')
-            gas_price = self.w3.to_wei(self.config.gas_price_gwei, 'gwei')
-            
-            tx = {
-                'from': sender.address,
-                'to': receiver.address,
-                'value': transfer_amount_wei,
-                'gas': self.config.gas_limit,
-                'gasPrice': gas_price,
-                'nonce': nonce,
-                'chainId': self.w3.eth.chain_id
-            }
-            
-            signed_tx = self.w3.eth.account.sign_transaction(tx, sender.key)
-            tx_hash = self.w3.eth.send_raw_transaction(signed_tx.rawTransaction)
-            
-            return True
-            
-        except Exception as e:
-            return False
+        """同步发送单笔交易（包装器）"""
+        return self._send_transaction(sender, receiver, nonce)
     
     def run_test_threaded(self, duration_seconds: int = 60):
         """使用多线程运行 TPS 测试"""
@@ -604,6 +595,7 @@ def main():
     print(f"Gas 价格: {config.gas_price_gwei} Gwei")
     print("=" * 60)
     
+    tps_test = None
     try:
         # 创建测试实例
         tps_test = TPSTest(config)
@@ -637,7 +629,7 @@ def main():
             
     except KeyboardInterrupt:
         print("\n\n测试被用户中断")
-        if hasattr(tps_test, 'stats') and tps_test.stats.start_time > 0:
+        if tps_test and hasattr(tps_test, 'stats') and tps_test.stats.start_time > 0:
             tps_test.stats.end_time = time.time()
             tps_test.stats.display()
     except Exception as e:
